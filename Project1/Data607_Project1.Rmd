@@ -1,0 +1,61 @@
+---
+title: "Project 1"
+author: "Atta Boateng"
+date: "02-18-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+
+
+```{r echo=TRUE, results='asis'}
+library(stringr)
+library(knitr)
+
+dd <- readLines("tournamentinfo.txt");
+dd <- str_remove_all(as.character(dd), "-")
+dd <- str_squish(dd);
+
+pair <- c();
+player_name <- c();
+player_state <- c();
+tot <- c();
+pre <- c();
+
+
+
+
+for(i in seq(5,length(dd),3))
+{
+
+
+  d1 <- scan(text = dd[i], what = "character", sep = "|");
+  d2 <- scan(text = dd[i+1], what = "character", sep = "|");
+
+  pair <- append(pair, d1[1]);
+  player_name <- append(player_name,d1[2]);
+  player_state <- append(player_state,d2[1]);
+  tot <- append(tot,d1[3]);
+
+  t0 <- str_replace_all(as.character(d2[2]),">"," ");
+  t0 <- scan(text = t0, what="character")[4];
+  pre <- append(pre,t0);
+
+
+}
+
+data <- data.frame(
+  index = pair,
+  name = player_name,
+  state = player_state,
+  total = tot,
+  pre_rating = pre
+);
+
+kable(data)
+write.csv(data,"tournament.csv")
+
+
+```
