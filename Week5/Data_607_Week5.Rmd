@@ -1,0 +1,79 @@
+---
+title: "Tidying and Transforming Data"
+author: "Atta Boateng"
+date: "02-25-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+I'll first start by creating a data frame to analogous to table presented and write it to an csv file.
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+
+
+data <- data.frame(c(NA, 'ALASKA', NA, NA, 'AM WEST', NA),
+                   c(NA, 'on time', 'delayed', NA, 'on time', 'delayed'),
+                   c('Los Angeles', 497, 62, NA, 694, 117),
+                   c('Phoenix', 221, 12, NA, 4840, 415),
+                   c('San Diego', 212, 20, NA, 383, 65),
+                   c('San Francisco', 503, 102, NA, 320, 129),
+                   c('Seattle', 1841, 305, NA, 201, 61));
+
+#kable(data)
+write.table(data,"airlines.csv",col.names = FALSE, row.names=FALSE, sep = ",")
+
+#write.table(data,"airlines.csv", sep = ",")
+```
+
+Transforming the data 
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+
+
+dd <- read.csv("airlines.csv");
+dd <- data.frame(dd); # convert into a data frame
+dd <- dd[rowSums(is.na(dd)) != ncol(dd), ]; # remove empty rows
+
+
+dd <- rename(dd, c("airline" = "NA.",
+                   "status" = "NA..1",
+                   "Los Angeles" = "Los.Angeles",
+                   "San Diego" = "San.Diego",
+                   "San Francisco" = "San.Francisco"));
+dd <- gather(dd, key="destination", value="amount", 3:7);
+dd <- dd %>% fill(airline, .direction = "down") # fill the blank rows of the airline column with the previous value
+
+
+kable(dd) #showing transformed table
+```
+
+
+Perform analysis to compare the arrival delays for the two airlines
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+# 
+# airline_delay <- dd %>% group_by(airline) %>%
+#                         summarise(delay_count = count(dd$amount))
+
+dd2 <- filter(dd,status == "delayed" & airline == "ALASKA");
+kable(dd2)
+
+print(paste("Alaska airlines has amount of delays of: ",sum(dd2$amount)))
+
+dd2 <- filter(dd,status == "delayed" & airline == "AM WEST");
+kable(dd2)
+
+print(paste("AM WEST airlines has amount of delays of: ",sum(dd2$amount)))
+
+```
