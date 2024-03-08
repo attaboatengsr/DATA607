@@ -1,0 +1,85 @@
+---
+title: "Working with XML and JSON in R"
+author: "Atta Boateng"
+date: "03-10-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+###Book
+
+This is the books dataframe
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(rvest)
+library(xml2)
+library(rjson)
+library(XML)
+
+books <- data.frame(
+   title = c("Les Miserable", "The Wind Up Bird Chronicle", "Homegoing", "Punching the Air"),
+   author = c("Victor Hugo", "Haruki Murakami", "Yaa Gyasi", "Ibi Zoboi, Yusef Salaam"),
+   year = c("January 1, 1862", "April 12, 1994", "June 7, 2016", "September 1, 2020"),
+   pages_amount = c(1463, 607, 305, 400)
+   );
+
+kable(books)
+ 
+
+```
+
+Reading the html file and loading as a dataframe
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(rvest)
+library(xml2)
+library(rjson)
+library(XML)
+
+ddhtml <- read_html("books.html");
+ddhtml <- html_table(ddhtml);
+kable(ddhtml)
+```
+
+Reading the xml file and loading it as a dataframe
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(rvest)
+library(xml2)
+library(rjson)
+library(XML)
+
+
+ddxml <- xmlToDataFrame("books.xml");
+kable(ddxml)
+
+```
+
+Reading the json file and loading it as a dataframe
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(rvest)
+library(xml2)
+library(rjson)
+library(XML)
+
+ddjson <- as.data.frame(fromJSON(file = "books.json"));
+kable(ddjson)
+
+```
+
+The json format seems to be only one that looks different. Further processing would need to be done to make it look like the others.

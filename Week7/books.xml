@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bookscatalog>
+
+<book>
+  <title>Les Miserable</title>
+  <author>Victor Hugo</author>
+  <year>January 1, 1862</year>
+  <page_amount>1463</page_amount>
+</book>
+
+<book>
+  <title>The Wind Up Bird Chronicle</title>
+  <author>Haruki Murakami</author>
+  <year>April 12, 1994</year>
+  <page_amount>607</page_amount>
+</book>
+
+<book>
+  <title>Homegoing</title>
+  <author>Yaa Gyasi</author>
+  <year>June 7, 2016</year>
+  <page_amount>305</page_amount>
+</book>
+
+<book>
+  <title>Punching the Air</title>
+  <author>Ibi Zoboi, Yusef Salaam</author>
+  <year>September 1, 2020</year>
+  <page_amount>400</page_amount>
+</book>
+
+</bookscatalog>

@@ -1,0 +1,28 @@
+{
+  "book": [
+    {
+      "title": "Les Miserable",
+      "author": "Victor Hugo",
+      "year": "January 1, 1862",
+      "page_amount": 1463
+    },
+    {
+      "title": "The Wind Up Bird Chronicle",
+      "author": "Haruki Murakami",
+      "year": "April 12, 1994",
+      "page_amount": 607
+    },
+    {
+      "title": "Homegoing",
+      "author": "Yaa Gyasi",
+      "year": "June 7, 2016",
+      "page_amount": 305
+    },
+    {
+      "title": "Punching the Air",
+      "author": "Ibi Zoboi, Yusef Salaam",
+      "year": "September 1, 2020",
+      "page_amount": 400
+    }
+  ]
+}
