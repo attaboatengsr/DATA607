@@ -1,0 +1,34 @@
+---
+title: "Web APIs"
+author: "Atta Boateng"
+date: "03-24-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+The following gets books review from the author named Haruki Murakami from the New York Times book review api
+
+```{r echo=TRUE, results='asis'}
+
+library(dbplyr)
+library(tidyverse)
+library(knitr)
+library(httr)
+library(rvest)
+library(rjson)
+
+
+res <- GET("https://api.nytimes.com/svc/books/v3/reviews.json?author=Haruki%20Murakami&api-key=Z8ecCgd5TuBpvYWrDEWN9JWcO04fj3SC");
+
+
+data <- fromJSON(rawToChar(res$content));
+data <- data$results;
+data <- data.table::rbindlist(data);
+
+kable(data)
+
+
+
+```
