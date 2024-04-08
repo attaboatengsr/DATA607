@@ -1,0 +1,36 @@
+---
+title: "Text Mining"
+author: "Atta Boateng"
+date: "04-07-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+###1. Scenario Analysis: 
+
+
+#### Who are your target users?
+
+According to an article by "RestaurantDive", 63 percent of GrubHub users are between the age of 18 to 29 followed by 51 percent that are between the age of 30 to 44 percent.
+
+#### What are their key goals?
+
+According the GrubHub website, their key goals are to "...help independent restaurants plug into and take advantage of the digital economy, enabling them to modernize their operations...increased access of restaurants to diners"
+
+#### How can you help them accomplish these goals?
+
+Based on a user's proximity and prefers, creating a robust recommendation engine based on distance and food categories would allow food deliveries to be faster and connect the users with the local restaurants.
+
+
+###2. Attempt to reverse engineer what you can about the site, from the site interface and any available information that you can find on the Internet or elsewhere:
+
+On the site home page, there is an input box for your address and button to search for stores nearby. Based on this, I can assume that the site either uses the gps location of the user to search for restaurants within a particular radius. There is probably a databases that with tables of the restaurant names, menu, latitude and latitude, and item prices. There might also be data related to delivery drivers and the locations.
+
+When a user searches for restaurants, it initially filters on the restaurant within a calculated radius using the latitude and longitude and provides a list to the users. Based on the users choices from the list, it might collect information on the time and/or day of the order, the food type, how fast the delivey was etc.. Based on this information, a model might be created to recommend restaurants for future orders based on the previously collected information.
+
+###3. Include specific recommendations about how to improve the site's recommendation capabilities going forward.
+
+
+I feel the site's recommendation capabilities can be improved by having multiple way to get user input rather than just the location. Maybe they have allow users to take photos and/or send photos of food their want to try. Send how a lot of people take photos of their food on social media, it just prove to be a useful way of gathering more information about the user and know exactly the type of food they want.
