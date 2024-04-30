@@ -1,0 +1,93 @@
+---
+title: "Data_607_Project4"
+author: "Atta Boateng"
+date: "2024-04-28"
+output: html_document:
+  figure_caption: yes
+---
+
+
+
+```{r setup, include=TRUE}
+library(tm)
+
+url1 <- "https://spamassassin.apache.org/old/publiccorpus/20030228_easy_ham.tar.bz2"
+url2 <- "https://spamassassin.apache.org/old/publiccorpus/20021010_spam.tar.bz2"
+
+
+download.file(url = url1, "./easy_ham")
+untar("easy_ham", exdir=".", compressed = "bzip2")
+
+download.file(url = url2, "./spam")
+untar("spam", exdir=".", compressed = "bzip2")
+
+```
+
+### Easy_ham data retrieval and process
+```{r setup, include=TRUE}
+library(tm)
+
+email_h <- list.files(path="./easy_ham", full.names=TRUE, recursive=TRUE)
+
+ham_read <- function(x){read_file(x)}
+dd_ham <- lapply(email_h, ham_read)
+dd_ham <- unlist(dd_ham)
+
+eh_df <- as.data.frame(dd_ham)
+eh_df <- eh_df %>% mutate(category = "easy_ham")
+
+```
+
+### Spam data retrieval and process
+```{r setup, include=TRUE}
+library(tm)
+
+email_h <- list.files(path="./spam", full.names=TRUE, recursive=TRUE)
+
+spam_read <- function(x){read_file(x)}
+dd_spam <- lapply(email_h, spam_read)
+dd_spam <- unlist(dd_spam)
+
+sp_df <- as.data.frame(dd_spam)
+sp_df <- eh_df %>% mutate(category = "spam")
+
+
+
+dd <- rbind(sp_df, eh_df)
+
+dd
+
+```
+
+```{r setup, include=TRUE}
+
+library(tm)
+
+
+c <- Corpus(VectorSource(as.data.frame(dd$dd_ham)))
+c <- tm_map(c, PlainTextDocument)
+c <- tm_map(c, content_transformer(tolower))
+c <- tm_map(c, removePunctuation)
+c <- tm_map(c, stripWhitespace)
+c <- tm_map(c, removeWords,stopwords("english"))
+
+
+
+
+data <- DocumentTermMatrix(c)
+data <- as.matrix(data)
+
+#data
+
+```
+
+
+
+
+```{r setup, include=TRUE}
+
+data <- as.data.frame(as.matrix(data))
+data
+
+```
+
