@@ -1,0 +1,75 @@
+---
+title: "Project 2"
+author: "Atta Boateng"
+date: "03-03-2024"
+output: 
+  html_document:
+    figure_caption: yes
+
+---
+
+###Global Inflation Data
+
+Tidying up data
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(stringr)
+
+global_inflation <- read.csv("global_inflation_data.csv", sep= ",");
+
+kable(global_inflation)
+
+global_inflation <- gather(global_inflation, key="year", value="inflation_rate", 3:47);
+global_inflation$year <- str_extract(global_inflation$year,"\\d+"); 
+
+#kable(global_inflation)
+```
+
+The indicator_name column isn't significant for analysis so it can be removed.
+One was the analysis the person wanted to do was finding countries with similar economic. 
+
+```{r echo=TRUE, results='asis'}
+library(tidyr)
+library(dplyr)
+library(knitr)
+
+###removing the indicator_name column
+
+global_inflation <- data.frame(country_name = c(global_inflation$country_name),
+           year = c(global_inflation$year),
+           inflation_rate = c(global_inflation$inflation_rate))
+
+
+###omit rows where the inflation rate is missing
+global_inflation <- na.omit(global_inflation)
+
+kable(global_inflation)
+
+```
+
+
+
+
+```{r echo=TRUE, results='asis'}
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+
+
+avg_country_inflation <- global_inflation %>% group_by(country_name) %>%
+                   summarise(avg_inflation = mean(inflation_rate), 
+                             .groups = 'drop')
+
+###To restrict it, I'll look at countries whose average inflation rate is 11 or less
+
+avg_country_inflation <- avg_country_inflation %>% filter( avg_inflation <= 11)
+##Having a scatter plot have concentrations of countries with similar inflation rates
+
+ggplot(avg_country_inflation, aes(x = country_name, y = avg_inflation)) + geom_point()+ theme(axis.text.x = element_text(angle = 90, size = 2))
+
+```
