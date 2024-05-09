@@ -1,0 +1,178 @@
+---
+title: "Final Project"
+author: "Atta Boateng"
+output: html_document
+---
+
+
+```{r echo=TRUE, results='asis'}
+library(httr)
+library(rjson)
+library(dplyr)
+
+### making a get request from the api
+
+ul <- "https://data.cityofnewyork.us/resource/uip8-fykc.json?$query=SELECT%0A%20%20%60arrest_key%60%2C%0A%20%20%60arrest_date%60%2C%0A%20%20%60pd_cd%60%2C%0A%20%20%60pd_desc%60%2C%0A%20%20%60ky_cd%60%2C%0A%20%20%60ofns_desc%60%2C%0A%20%20%60law_code%60%2C%0A%20%20%60law_cat_cd%60%2C%0A%20%20%60arrest_boro%60%2C%0A%20%20%60arrest_precinct%60%2C%0A%20%20%60jurisdiction_code%60%2C%0A%20%20%60age_group%60%2C%0A%20%20%60perp_sex%60%2C%0A%20%20%60perp_race%60%2C%0A%20%20%60x_coord_cd%60%2C%0A%20%20%60y_coord_cd%60%2C%0A%20%20%60latitude%60%2C%0A%20%20%60longitude%60%2C%0A%20%20%60geocoded_column%60%2C%0A%20%20%60%3A%40computed_region_f5dn_yrer%60%2C%0A%20%20%60%3A%40computed_region_yeji_bk3q%60%2C%0A%20%20%60%3A%40computed_region_92fq_4b7q%60%2C%0A%20%20%60%3A%40computed_region_sbqj_enih%60%2C%0A%20%20%60%3A%40computed_region_efsh_h5xi%60"
+
+res <- GET(ul)
+
+dd <- fromJSON(rawToChar(res$content))
+dd<- data.table::rbindlist(dd, fill = TRUE)
+
+
+### Creating and ID for the the geograpraphy table
+dd <- dd %>% mutate(geo_id = paste(dd$`:@computed_region_efsh_h5xi`, dd$arrest_key, sep = ""))
+
+
+arrest <- data.frame( arrest_key = dd$arrest_key,
+                      arrest_date = dd$arrest_date,
+                      arrest_boro = dd$arrest_boro,
+                      arrest_precinct = dd$arrest_precinct,
+                      jurisdiction_code = dd$jurisdiction_code,
+                      age_group = dd$age_group,
+                      
+                      pd_cd = dd$pd_cd,
+                      law_code = dd$law_code,
+                      law_cat_cd = dd$law_cat_c,
+                      
+                      perp_sex = dd$perp_sex,
+                      perp_race = dd$perp_race)
+
+offenses <- data.frame(pd_cd = dd$pd_cd,
+                       pd_desc = dd$pd_desc,
+                       ky_cd = dd$ky_cd,
+                       ofns_desc = dd$ofns_desc)
+
+
+geographic_information <- data.frame(geo_id = dd$geo_id,
+                                     latitude = dd$latitude,
+                                     longitude = dd$longitude,
+                                     geocoded_column = dd$geocoded_column)
+```
+
+
+###Writing these tables to the database and creating my primary keys and foreign keys
+
+```{r echo=TRUE, results='asis'}
+library("RMySQL")
+library(DBI)
+library(knitr)
+
+conn <- dbConnect(MySQL(), user = 'atta.boatengsr67', password = 'atta.boatengsr67', dbname='atta.boatengsr67', host = 'cunydata607sql.mysql.database.azure.com')
+
+query <- "DROP TABLE ARREST;"
+dbGetQuery(conn, query)
+
+query <- "DROP TABLE OFFENSES;"
+dbGetQuery(conn, query)
+
+dbWriteTable(conn, "ARREST", arrest, row.names=FALSE)
+dbWriteTable(conn, "OFFENSES", offenses, row.names=FALSE)
+#dbWriteTable(conn, "GEOGRAPHIC_INFORMATION", geographic_information, row.names=FALSE)
+# dbWriteTable(conn, "GEOGRAPHIC_INFORMATION", geographic_information, value=geographic_information, append=TRUE,temporary=FALSE)
+
+query <- "select * from arrest;";
+kable(dbGetQuery(conn, query))
+
+query <- "select * from offenses;"
+kable(dbGetQuery(conn, query))
+
+# 
+# dbGetQuery(conn, "SHOW KEYS FROM ARREST WHERE Key_name = 'PRIMARY';" )
+# dbGetQuery(conn, "ALTER TABLE ARREST DROP PRIMARY KEY;")
+
+
+# query <- "ALTER TABLE ARREST
+# ADD FOREIGN KEY (pd_cd) REFERENCES OFFENSES(pd_cd);"
+# dbGetQuery(conn, query)
+
+
+
+```
+
+###Analysis
+
+```{r echo=TRUE, results='asis'}
+library("RMySQL")
+library(DBI)
+library(ggplot2)
+library(knitr)
+
+## The KY_CD is a classification code used to classify the type of arrest that was made. I will first find the frequency distribution of the the classified arrest for each borough
+
+query <- "select arrest.arrest_boro, offenses.ky_cd, offenses.pd_desc, count(offenses.ky_cd) from arrest inner join offenses on arrest.pd_cd = offenses.pd_cd
+group by arrest.arrest_boro, offenses.ky_cd, offenses.pd_desc;"
+
+offs_count <- dbGetQuery(conn, query)
+summary(lm(ky_cd ~ arrest_boro, data = offs_count))
+
+### Since the p-value is greater than 0.05, there is not significant evidence that supports the relationship between an arrest classification type and the borough in which 
+
+### Distribution for Bronx
+bronx_offs <- offs_count %>% filter(arrest_boro == "B")
+kable(bronx_offs)
+
+ggplot(data=bronx_offs, aes(x=pd_desc, y=`count(offenses.ky_cd)`))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, size = 5))
+
+
+### Distribution for Brooklyn
+brooklyn_offs <- offs_count %>% filter(arrest_boro == "K")
+kable(brooklyn_offs)
+
+ggplot(data=brooklyn_offs, aes(x=pd_desc, y=`count(offenses.ky_cd)`))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, size = 5))
+
+
+### Distribution for Manhattan
+manhattan_offs <- offs_count %>% filter(arrest_boro == "M")
+kable(manhattan_offs)
+
+ggplot(data=manhattan_offs, aes(x=pd_desc, y=`count(offenses.ky_cd)`))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, size = 5))
+
+### Distribution for Queens
+queens_offs <- offs_count %>% filter(arrest_boro == "Q")
+kable(queens_offs)
+
+ggplot(data=queens_offs, aes(x=pd_desc, y=`count(offenses.ky_cd)`))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, size = 5))
+
+
+
+
+### Distribution for Staten Island
+staten_island_offs <- offs_count %>% filter(arrest_boro == "S")
+kable(staten_island_offs)
+
+ggplot(data=staten_island_offs, aes(x=pd_desc, y=`count(offenses.ky_cd)`))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, size = 5))
+
+
+
+```
+
+```{r echo=TRUE, results='asis'}
+library("RMySQL")
+library(DBI)
+library(ggplot2)
+
+
+bronx_offs_fq <- bronx_offs %>% filter(`count(offenses.ky_cd)` ==max(`count(offenses.ky_cd)`))
+
+kable(bronx_offs_fq)
+
+brooklyn_offs_fq <- brooklyn_offs %>% filter(`count(offenses.ky_cd)` ==max(`count(offenses.ky_cd)`))
+kable(brooklyn_offs_fq)
+
+manhattan_offs_fq <- manhattan_offs %>% filter(`count(offenses.ky_cd)` ==max(`count(offenses.ky_cd)`))
+kable(manhattan_offs_fq)
+
+
+queens_offs_fq <- queens_offs %>% filter(`count(offenses.ky_cd)` ==max(`count(offenses.ky_cd)`))
+kable(queens_offs_fq)
+
+
+staten_island_offs_fq <- staten_island_offs %>% filter(`count(offenses.ky_cd)` ==max(`count(offenses.ky_cd)`))
+kable(staten_island_offs_fq)
+```
+
+
+### Conclusion:
+
+Although there wasn't significant evidence to show relationship between arrest types and the borough it might be in, it seems the most common type arrest type across all the borough is Assault.
